@@ -1,0 +1,14 @@
+[Unit]
+Description=Kiosk printer
+After=network.target
+
+[Service]
+ExecStart=/opt/kiosk/python3 -u kiosk.py
+WorkingDirectory=/opt/kiosk
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
