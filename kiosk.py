@@ -30,12 +30,14 @@ WD='/dev/watchdog'
 wdObj=None
 
 def start_watchog(watchdog_device):
-    try:
-        dev=open(watchdog_device,'w')
-    except:
-        dev = None
+    dev=None
+    if watchdog_device is not None:
+        try:
+            dev=open(watchdog_device,'w')
+        except Exception as e:
+            logging.info(e)
+    logging.info("Watchdog {}".format('enabled' if dev is not None else 'disabled'))
     return(dev)
-wdObj=start_watchog(WD)
 
 def update_leds(l,b):
     logging.info('Active button: {}'.format(b))
@@ -92,7 +94,7 @@ def main(args):
         port=PORT
     if args.host is None:
         host=HOST
-    logging.info('Watchdog {}'.format('disabled' if wdObj is None else 'enabled'))
+    #logging.info('Watchdog {}'.format('disabled' if wdObj is None else 'enabled'))
     active_button=DEFAULT_BUTTON
     leds=ledButtons(LED_PINS,BUZ_PIN)
     bttn=pushButtons(BUTTON_PINS,timeout=BUTTON_TIMEOUT)
@@ -102,10 +104,13 @@ def main(args):
     leds.blink(s=True)
     #Set default button/lang on
     leds.on(active_button)
+    #Start wtchdog
+    global wdObj
+    wdObj=start_watchog(WD)
     #Main loop
     while bcr.running:
         #Pat watchdog if on
-        if WD is not None:
+        if wdObj is not None:
             print('1',file = wdObj, flush = True)
         #Monitor buttons
         if bttn.pressed() is not None:
